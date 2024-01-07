@@ -2,6 +2,7 @@ import players
 import random
 import os
 import time
+import bid
 CARDS=[]
 colors = ["pik", "trefl", "karo", "kier"]
 for color in colors:
@@ -11,6 +12,9 @@ for color in colors:
       "value": i,
     })
 PLAYERS = []
+firstGame=True
+INITIALCREDITS=500
+
 NUMBEROFPLAYERS = 4
 PLAYERS = players.getPlayers(NUMBEROFPLAYERS)
 
@@ -25,6 +29,10 @@ def giveRoles():
     else:
       PLAYERS[(i+randomPlayerIndex)%NUMBEROFPLAYERS]['role'] = ""
 
+def giveInitialCredits():
+  if firstGame:
+    for player in PLAYERS:
+      player['credits']=INITIALCREDITS
 
 def giveCardsToPlayers():
   #tasowanie
@@ -68,8 +76,11 @@ def showCardsToPlayers():
 
 def startGame():
   giveRoles()
+  giveInitialCredits()
   giveCardsToPlayers()
   showCardsToPlayers()
+  bid.startBidding(PLAYERS)
+
 startGame()
 
 
