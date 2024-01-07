@@ -71,7 +71,7 @@ def showCardsToPlayers():
 
     playersCards = f"{card1Name} {player['cards'][0]['color']}, {card2Name} {player['cards'][1]['color']}"
     print(f"{player['nick']} {player['role']}: {playersCards}")
-    time.sleep(5)
+    time.sleep(1)
     os.system('cls')
 
 def startGame():
