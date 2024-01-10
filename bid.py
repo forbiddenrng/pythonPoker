@@ -38,7 +38,7 @@ def makeMove(PLAYERSARRAY, playerOnMove, moves):
       print("Wybierz poprawną opcję")
   ## czyszczenie ekranu i wyświetlenie graczy
   os.system('cls')
-  displayPlayers(PLAYERSARRAY)
+  #displayPlayers(PLAYERSARRAY)
   return moves[playersMove-1]
 
 def fold(PLAYERSARRAY, playerIndex):
@@ -52,18 +52,23 @@ def call(PLAYERSARRAY, playerOnMove):
 
 def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves):
   decision=makeMove(PLAYERSARRAY, playerOnMove, possibleMoves)
+  #displayPlayers(PLAYERSARRAY)
   if decision=="fold":
     newPlayersArray = fold(PLAYERSARRAY, playerOnMove)
+    displayPlayers(newPlayersArray)
     if len(newPlayersArray)==1:
       print(f"Wygrywa gracz {newPlayersArray[0]['nick']}")
       return 0
     nextPlayer = setNextPlayer(playerOnMove-1, len(newPlayersArray))
     continueBidding(newPlayersArray, nextPlayer, ['fold', 'call', 'raise'])
   elif decision=="call":
+    #displayPlayers(PLAYERSARRAY)
     placeABet(PLAYERSARRAY, playerOnMove, currentBet)
+    displayPlayers(PLAYERSARRAY)
     nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
     continueBidding(PLAYERSARRAY, nextPlayer, ['fold', 'call', 'raise'])
   elif decision=="raise":
+    displayPlayers(PLAYERSARRAY)
     bet=0
     while True:
       bet=int(input("Podaj wartość bet'a: "))
@@ -73,7 +78,7 @@ def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves):
         print("Zakład nie może być mniejszy niż poprezdni!")
       else:
         break 
-
+    
     placeABet(PLAYERSARRAY, playerOnMove, bet)
     nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
     continueBidding(PLAYERSARRAY, nextPlayer, ['fold', 'call', 'raise'])
