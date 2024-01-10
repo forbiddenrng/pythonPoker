@@ -16,14 +16,16 @@ def createPlayers(numberOfPlayers):
 def savePlayersData(playersDict):
   with open("players.json", "w") as file:
     json.dump(playersDict, file)
+  
 
 def getPlayers(numberOfPlayers):
   with open("players.json", "r") as file:
     data = json.load(file)
+  
   ## jeśli nie ma graczy zapisanych w bazie to stwórz ich i zapisz do pliku
   
   if len(data) == 0:
-    data = createPlayers()
+    data = createPlayers(numberOfPlayers)
     savePlayersData(data)
   
   return data
