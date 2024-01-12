@@ -3,6 +3,7 @@ import random
 import os
 import time
 import bid
+import cards
 CARDS=[]
 colors = ["pik", "trefl", "karo", "kier"]
 for color in colors:
@@ -34,7 +35,7 @@ def giveInitialCredits():
     for player in PLAYERS:
       player['credits']=INITIALCREDITS
 
-def giveCardsToPlayers():
+'''def giveCardsToPlayers():
   #tasowanie
   random.shuffle(CARDS)
   cardsIndex=0
@@ -42,8 +43,8 @@ def giveCardsToPlayers():
     PLAYERS[j]['cards'] = [CARDS[cardsIndex], CARDS[cardsIndex+1]]
     cardsIndex+=2
   
-def showCardsToPlayers():
-  for player in PLAYERS:
+def showCardsToPlayers(players):
+  for player in players:
     card1Value=player['cards'][0]['value']
     card2Value=player['cards'][1]['value']
     card1Name=""    
@@ -73,14 +74,17 @@ def showCardsToPlayers():
     print(f"{player['nick']} {player['role']}: {playersCards}")
     time.sleep(1)
     os.system('cls')
-
+'''
 def startGame():
   giveRoles()
   giveInitialCredits()
-  giveCardsToPlayers()
-  showCardsToPlayers()
-  bid.startBidding(PLAYERS)
-
+  cards.giveCardsToPlayers(PLAYERS, CARDS, NUMBEROFPLAYERS)
+  cards.showCardsToPlayers(PLAYERS)
+  ## licytacja 1
+  newPlayersArray = bid.startBidding(PLAYERS)
+  ## pierwsze 3 karty
+  flop=cards.selectFlop(NUMBEROFPLAYERS, CARDS)
+  bid.beginNextRound(PLAYERS, newPlayersArray, flop)
 startGame()
 
 

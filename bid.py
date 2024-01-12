@@ -1,9 +1,9 @@
-import os
+import os, cards
 SMALLBLIND = 10
 currentBet= 0
 pot=0
 MAXBID=200
-
+checkNumber=0
 playersBets={
   
 }
@@ -16,17 +16,6 @@ def getPrevPlayer(PLAYERSARRAY, playerOnMove):
     return len(PLAYERSARRAY)-1
   else:
     return playerOnMove-1
-################## FIX ###########################
-'''def getPrevBet(PLAYERSARRAY,playerOnMove):
-  prevPlayer = getPrevPlayer(PLAYERSARRAY,playerOnMove)
-  prevBetArr = playersBets[PLAYERSARRAY[prevPlayer]['nick']]
-  prevBet = prevBetArr[len(prevBetArr)-1]
-  return prevBet
-
-def getLastPlayersBet(PLAYERSARRAY, playerOnMove):
-  lastBestArr = playersBets[PLAYERSARRAY[playerOnMove]['nick']]
-  return lastBestArr[len(lastBestArr)-1]'''
-################## FIX ###########################
 
 def getPlayersBetsSum(PLAYERSARRAY, player):
   nick=PLAYERSARRAY[player]['nick']
@@ -69,19 +58,23 @@ def setNextPlayer(currentPlayer, arrLen):
     currentPlayer+=1
     return currentPlayer
 
-def displayPlayers(PLAYERSARRAY):
+def displayCards(cardsToDisplay):
+  if not len(cardsToDisplay)==0:
+    print("Karty na stole: ", end="")
+    for card in cardsToDisplay:
+      cardName=cards.getCardName(card['value'])
+      print(f"{cardName} {card['color']}, ", end="")
+    print()
+
+def displayPlayers(PLAYERSARRAY, displayedCards=[]):
   for player in PLAYERSARRAY:
     print(f"{player['nick']} {player['role']}: {player['credits']}$")
   print(f"W puli aktualnie jest: {pot}$")
   print(f"Wysokość ostatniego zakładu: {currentBet}$")
+  displayCards(displayedCards)
 
 
 def makeMove(PLAYERSARRAY, playerOnMove, moves):
-  ## sprawdzenie czy licytacja się nie skończyła -- czy każdy gracz dał tyle samo do puli
-  ## jeśli każdy dał tyle samo do puli to licytacja się kończy i przechodzi do następnego etapu.
-  isEnd=isBiddingEnd(PLAYERSARRAY)
-  if isEnd:
-    print("Koniec Licytacji")
   
   print(f"Ruch gracza: {PLAYERSARRAY[playerOnMove]['nick']}")
   i=1
@@ -104,16 +97,6 @@ def fold(PLAYERSARRAY, playerIndex):
 
 def call(PLAYERSARRAY, playerOnMove):
   betToCall=0
-  '''if len(playersBets[PLAYERSARRAY[playerOnMove]['nick']])==0:
-    ## gracz wczesniej nie zlozyl betow
-    prevBet=getPrevBet(PLAYERSARRAY,playerOnMove)
-    betToCall=prevBet
-    #print(betToCall, prevBet)
-  else:
-    prevBet=getPrevBet(PLAYERSARRAY,playerOnMove)
-    lastBet=getLastPlayersBet(PLAYERSARRAY,playerOnMove)
-    betToCall=prevBet-lastBet
-    print(prevBet,lastBet, betToCall)'''
   ### sprawdzenie ile ostatni gracz wrzucił łącznie do puli
   prevPlayer = getPrevPlayer(PLAYERSARRAY, playerOnMove)
   prevPlayerBetsSum= getPlayersBetsSum(PLAYERSARRAY, prevPlayer)
@@ -123,21 +106,50 @@ def call(PLAYERSARRAY, playerOnMove):
   placeABet(PLAYERSARRAY, playerOnMove, betToCall)
   nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
 
+def getPlayersResponse(message):
+  while True:
+    try:
+      x=input(message)
+      liczba=int(x)
+      return liczba
+    except ValueError:
+      print("Wprowadź poprawną wartość!!!")
 
-def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves):
+
+def betMove(PLAYERSARRAY, playerOnMove):
+  bet=0
+  while bet>MAXBID or bet<=0 or bet>PLAYERSARRAY[playerOnMove]['credits']:
+    bet = getPlayersResponse("Podaj wartość bet'a: ")
+  os.system('cls')
+  placeABet(PLAYERSARRAY, playerOnMove, bet)
+  global currentBet
+  currentBet=bet
+
+
+
+def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves, biddingStart=False, displayedCards=[]):
+  ## sprawdzenie czy licytacja się nie skończyła -- czy każdy gracz dał tyle samo do puli
+  ## jeśli każdy dał tyle samo do puli to licytacja się kończy i przechodzi do następnego etapu.
+  isEnd=isBiddingEnd(PLAYERSARRAY)
+  if isEnd and not biddingStart:
+    return PLAYERSARRAY
   decision=makeMove(PLAYERSARRAY, playerOnMove, possibleMoves)
   if decision=="fold":
+
     newPlayersArray = fold(PLAYERSARRAY, playerOnMove)
-    displayPlayers(newPlayersArray)
+    displayPlayers(newPlayersArray, displayedCards)
     if len(newPlayersArray)==1:
       print(f"Wygrywa gracz {newPlayersArray[0]['nick']}")
       return 0
     nextPlayer = setNextPlayer(playerOnMove-1, len(newPlayersArray))
-    continueBidding(newPlayersArray, nextPlayer, ['fold', 'call', 'raise'])
+    if biddingStart==False:
+      continueBidding(newPlayersArray, nextPlayer, ['fold', 'call', 'raise'], biddingStart)
+    else:
+      continueBidding(newPlayersArray, nextPlayer, ['check', 'bet', 'fold'], biddingStart)
   elif decision=="call":
     #placeABet(PLAYERSARRAY, playerOnMove, currentBet)
     call(PLAYERSARRAY,playerOnMove)
-    displayPlayers(PLAYERSARRAY)
+    displayPlayers(PLAYERSARRAY, displayedCards)
     nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
     continueBidding(PLAYERSARRAY, nextPlayer, ['fold', 'call', 'raise'])
   elif decision=="raise":
@@ -152,11 +164,25 @@ def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves):
         print(f"Zakład nie może być większy niż {MAXBID}$")
       else:
         break 
-
     placeABet(PLAYERSARRAY, playerOnMove, bet)
-    displayPlayers(PLAYERSARRAY)
+    displayPlayers(PLAYERSARRAY, displayedCards)
     nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
     continueBidding(PLAYERSARRAY, nextPlayer, ['fold', 'call', 'raise'])
+  elif decision=="check":
+    global checkNumber
+    checkNumber+=1
+    if checkNumber==len(PLAYERSARRAY):
+      ## koniec etapu licytacji
+      return PLAYERSARRAY
+    displayPlayers(PLAYERSARRAY, displayedCards)
+    nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
+    continueBidding(PLAYERSARRAY, nextPlayer, ['check', 'bet', 'fold'], True)
+  elif decision=="bet":
+    betMove(PLAYERSARRAY, playerOnMove)
+    displayPlayers(PLAYERSARRAY, displayedCards)
+    nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
+    continueBidding(PLAYERSARRAY, nextPlayer, ['fold', 'call', 'raise'])
+  return PLAYERSARRAY
 
 
 def startBidding(oryginalArray):
@@ -176,9 +202,30 @@ def startBidding(oryginalArray):
   placeABet(PLAYERSARRAY, playerOnMove, 2*SMALLBLIND) ## big blind
   playerOnMove = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
   displayPlayers(PLAYERSARRAY)
-  continueBidding(PLAYERSARRAY,playerOnMove, ['fold', 'call', 'raise'])
-  
+  newPlayersArray = continueBidding(PLAYERSARRAY,playerOnMove, ['fold', 'call', 'raise'])
 
+  return newPlayersArray
+  
+def beginNextRound(oryginalArray, PLAYERSARRAY, displayedCards):
+  ## zaczyna gracz siedzący najbliżej dealer'a
+  dealerIndex = 0
+  for i in range(len(oryginalArray)):
+    if oryginalArray[i]['role']=='D':
+      dealerIndex=i
+      break
+  playerOnMove=None
+  for i in range(dealerIndex+1, dealerIndex +1 + len(oryginalArray)):
+    for j in range(len(PLAYERSARRAY)):
+      if oryginalArray[i%len(oryginalArray)]['id']==PLAYERSARRAY[j]['id']:
+        playerOnMove = j
+        break
+    if playerOnMove is not None:
+      break
+  # continue bidding
+  # wyświetlenie kart
+  displayCards(displayedCards)
+  continueBidding(PLAYERSARRAY, playerOnMove, ['check', 'bet', 'fold'], True, displayedCards)
+  #print(playerOnMove, displayedCards)
 
 
 
