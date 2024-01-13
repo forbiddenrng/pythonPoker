@@ -4,6 +4,16 @@ def selectFlop(numberOfPlayers, cards):
   index=numberOfPlayers*2 ## od tego indexu wybierany jest flop
   return [cards[index], cards[index+1] , cards[index+2]]
 
+def selectTurn(numberOfPlayers, cards):
+  # po 2 karty dla gracza + 3 karty z flopa (od indexu 2*numberofplayers + 3)
+  # [G1 G1, G2 G2, G3 G3, G4 G4, F F F, T, R]
+  index = numberOfPlayers*2 + 3
+  return cards[index]
+
+def selectRiver(numberOfPlayers, cards):
+  index = numberOfPlayers*2 + 4
+  return cards[index]
+
 def giveCardsToPlayers(PLAYERS, CARDS, NUMBEROFPLAYERS):
   #tasowanie
   random.shuffle(CARDS)

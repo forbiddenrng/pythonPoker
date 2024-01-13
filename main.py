@@ -35,46 +35,6 @@ def giveInitialCredits():
     for player in PLAYERS:
       player['credits']=INITIALCREDITS
 
-'''def giveCardsToPlayers():
-  #tasowanie
-  random.shuffle(CARDS)
-  cardsIndex=0
-  for j in range(NUMBEROFPLAYERS):
-    PLAYERS[j]['cards'] = [CARDS[cardsIndex], CARDS[cardsIndex+1]]
-    cardsIndex+=2
-  
-def showCardsToPlayers(players):
-  for player in players:
-    card1Value=player['cards'][0]['value']
-    card2Value=player['cards'][1]['value']
-    card1Name=""    
-    card2Name=""
-    card1Name=card1Value    
-    card2Name=card2Value    
-    if card1Value>10:
-      if card1Value == 11:
-        card1Name="J"
-      elif card1Value == 12:
-        card1Name="Q"
-      elif card1Value == 13:
-        card1Name="K"
-      elif card1Value == 14:
-        card1Name="A"
-    if card2Value>10:
-      if card2Value == 11:
-        card2Name="J"
-      elif card2Value == 12:
-        card2Name="Q"
-      elif card2Value == 13:
-        card2Name="K"
-      elif card2Value == 14:
-        card2Name="A"
-
-    playersCards = f"{card1Name} {player['cards'][0]['color']}, {card2Name} {player['cards'][1]['color']}"
-    print(f"{player['nick']} {player['role']}: {playersCards}")
-    time.sleep(1)
-    os.system('cls')
-'''
 def startGame():
   giveRoles()
   giveInitialCredits()
@@ -83,8 +43,16 @@ def startGame():
   ## licytacja 1
   newPlayersArray = bid.startBidding(PLAYERS)
   ## pierwsze 3 karty
-  flop=cards.selectFlop(NUMBEROFPLAYERS, CARDS)
-  bid.beginNextRound(PLAYERS, newPlayersArray, flop)
+  communityCards=cards.selectFlop(NUMBEROFPLAYERS, CARDS)
+  arrayAfterFlop = bid.beginNextRound(PLAYERS, newPlayersArray, communityCards)
+  ## kolejna 4 karta - turn (dodawana jest do community cards)
+  turn = cards.selectTurn(NUMBEROFPLAYERS, CARDS)
+  communityCards.append(turn)
+  arrayAfterTurn = bid.beginNextRound(PLAYERS,arrayAfterFlop, communityCards)
+  ## 5 karta river
+  river = cards.selectRiver(NUMBEROFPLAYERS, CARDS)
+  communityCards.append(river)
+  arrayAfterRiver = bid.beginNextRound(PLAYERS, arrayAfterTurn, communityCards)
 startGame()
 
 
