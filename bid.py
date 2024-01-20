@@ -7,10 +7,19 @@ checkNumber=0
 playersBets={
   
 }
+def resetPlayersBets():
+  global playersBets
+  playersBets = {}
+def resetPot():
+  global pot
+  pot=0
+def getPot():
+  return pot 
 def setPlayersBetsList(PLAYERSARRAY):
   for player in PLAYERSARRAY:
     playersBets[player['nick']]=[]
   
+#################### TĘ FUNKCJĘ PRZENIEŚĆ
 def getPrevPlayer(PLAYERSARRAY, playerOnMove):
   if playerOnMove==0:
     return len(PLAYERSARRAY)-1
@@ -54,7 +63,7 @@ def isBiddingEnd(PLAYERSARRAY):
       return False
   return True
 
-
+################## TO MOZNA PRZENIESC
 def setNextPlayer(currentPlayer, arrLen):
   if currentPlayer == arrLen-1:
     return 0
@@ -108,7 +117,7 @@ def call(PLAYERSARRAY, playerOnMove):
   betToCall=prevPlayerBetsSum-currentPlayerBetsSum
 
   placeABet(PLAYERSARRAY, playerOnMove, betToCall)
-  nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
+  #nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
 
 def getPlayersResponse(message):
   while True:
@@ -134,6 +143,7 @@ def betMove(PLAYERSARRAY, playerOnMove):
 def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves, biddingStart=False, displayedCards=[]):
   ## sprawdzenie czy licytacja się nie skończyła -- czy każdy gracz dał tyle samo do puli
   ## jeśli każdy dał tyle samo do puli to licytacja się kończy i przechodzi do następnego etapu.
+  global checkNumber
   isEnd=isBiddingEnd(PLAYERSARRAY)
   if isEnd and not biddingStart:
     #print(PLAYERSARRAY)
@@ -141,7 +151,12 @@ def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves, biddingStart=Fals
     return PLAYERSARRAY
   decision=makeMove(PLAYERSARRAY, playerOnMove, possibleMoves)
   if decision=="fold":
-
+    
+    if checkNumber==len(PLAYERSARRAY):
+      ## koniec etapu licytacji
+      ## resetowanie liczby check
+      resetCheck()
+      return PLAYERSARRAY
     newPlayersArray = fold(PLAYERSARRAY, playerOnMove)
     displayPlayers(newPlayersArray, displayedCards)
     if len(newPlayersArray)==1:
@@ -177,7 +192,6 @@ def continueBidding(PLAYERSARRAY, playerOnMove, possibleMoves, biddingStart=Fals
     nextPlayer = setNextPlayer(playerOnMove, len(PLAYERSARRAY))
     continueBidding(PLAYERSARRAY, nextPlayer, ['fold', 'call', 'raise'], False, displayedCards)
   elif decision=="check":
-    global checkNumber
     checkNumber+=1
     if checkNumber==len(PLAYERSARRAY):
       ## koniec etapu licytacji
