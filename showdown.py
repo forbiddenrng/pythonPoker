@@ -1,7 +1,7 @@
 import bid, os
 from bid import getPot
 from bid import currentBet
-import cards, sortHand, win
+import cards, sortHand, win, display
 from evaluation import evaluateHand
 
 def showPlayersCards(PLAYERSARRAY):
@@ -41,17 +41,19 @@ def selectWinner(PLAYERSARRAY, communityCards):
     return [playersHandsValues[0][1]], playersHandsValues[0][0][0]
   else:
     # więcej niż jeden gracz ma taki sam, najwyższy układ
+    highestHandsTuplesList=playersHandsValues[:bestHandsNumber]
+    highestHandsIds=[tuple[1] for tuple in highestHandsTuplesList]
     playersHands=[]
     for player in PLAYERSARRAY:
-      playerCards=sorted([player['cards'][0]['value'], player['cards'][1]['value']])
-      playersHands.append((playerCards[0], playerCards[1], player['id']))
+      if player['id'] in highestHandsIds:
+        playerCards=sorted([player['cards'][0]['value'], player['cards'][1]['value']], reverse=True)
+        playersHands.append((playerCards[0], playerCards[1], player['id']))
     # sortowanie listy krotek wg. pierwszej wartości
+    #print(playersHands)
     playersHands.sort(key=lambda x: x[0], reverse=True)
-    print(playersHands)
+    #print(playersHands)
     ## usuwanie wszystkich krotek, które mają na 1 "slocie" inna wartość niż największa krotka
     playersHands=[tuple for tuple in playersHands if tuple[0]==playersHands[0][0]]
-
-
 
     '''for tuple in playersHands:
       if tuple[0]!= playersHands[0][0]:
@@ -87,7 +89,7 @@ def selectWinner(PLAYERSARRAY, communityCards):
 
 def showDown(PLAYERSARRAY, communityCards):
   os.system('cls')
-  bid.displayPlayers(PLAYERSARRAY, communityCards)
+  display.displayPlayers(PLAYERSARRAY, communityCards)
   showPlayersCards(PLAYERSARRAY)
   ## wybranie zwycięzcy
   selectWinnerOutput= selectWinner(PLAYERSARRAY, communityCards)

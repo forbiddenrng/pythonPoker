@@ -1,0 +1,40 @@
+{
+  "test1Players":[
+  {"nick": "Gracz 2", "id": 1, "credits": 305, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]},
+  {"nick": "Gracz 3", "id": 2, "credits": 740, "role": "SB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}
+  ],
+  "test1Cards": [{"color": "pik", "value": 5}, {"color": "trefl", "value": 6}, {"color": "karo", "value": 7}],
+  "test2Players":[
+    {"nick": "Gracz 2", "id": 1, "credits": 305, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]},
+    {"nick": "Gracz 3", "id": 2, "credits": 740, "role": "SB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}
+  ],
+  "test2Cards": [{"color": "karo", "value": 3}, {"color": "trefl", "value": 6}, {"color": "karo", "value": 7}],
+  "test3Players":[
+    {"nick": "Gracz 2", "id": 1, "credits": 305, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]},
+    {"nick": "Gracz 3", "id": 2, "credits": 740, "role": "SB", "cards": [{"color": "kier", "value": 7}, {"color": "trefl", "value": 4}]}
+  ],
+  "test3Cards": [{"color": "karo", "value": 3}, {"color": "trefl", "value": 6}, {"color": "karo", "value": 7}],
+  "test4Players":[
+    {"nick": "Gracz 2", "id": 1, "credits": 305, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]},
+    {"nick": "Gracz 3", "id": 2, "credits": 740, "role": "SB", "cards": [{"color": "kier", "value": 3}, {"color": "trefl", "value": 9}]}
+  ],
+  "test4Cards": [{"color": "karo", "value": 10}, {"color": "trefl", "value": 6}, {"color": "karo", "value": 7}],
+  "testQSort": [
+    [
+      {"nick": "Gracz 2", "id": 1, "credits": 305, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]}, 
+      {"nick": "Gracz 3", "id": 2, "credits": 740, "role": "SB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}
+    ],
+    [
+      {"nick": "Gracz 2", "id": 1, "credits": 305, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]}, 
+      {"nick": "Gracz 3", "id": 2, "credits": 740, "role": "SB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}, 
+      {"nick": "Gracz 1", "id": 0, "credits": 320, "role": "BB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]},
+      {"nick": "Gracz 4", "id": 3, "credits": 480, "role": "", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}
+    ],
+    [
+      {"nick": "Gracz 2", "id": 1, "credits": 320, "role": "D", "cards": [{"color": "pik", "value": 3}, {"color": "kier", "value": 9}]}, 
+      {"nick": "Gracz 3", "id": 2, "credits": 700, "role": "SB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}, 
+      {"nick": "Gracz 1", "id": 0, "credits": 320, "role": "BB", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]},
+      {"nick": "Gracz 4", "id": 3, "credits": 480, "role": "", "cards": [{"color": "pik", "value": 10}, {"color": "trefl", "value": 4}]}
+    ]
+  ]
+}

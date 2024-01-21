@@ -19,11 +19,11 @@ def evaluateHand(hand):
                 or values == [14, 5, 4, 3, 2])
 
   if straight and flush:
-    return 9, values[1]
+    return 9, values
   if flush:
     return 5, values
   if straight:
-    return 4, values[1]
+    return 4, values
   
   pairs=[]
   trips=[]
@@ -31,7 +31,7 @@ def evaluateHand(hand):
     count=sum(1 for _ in group)
     if count==4:
       # kareta 
-      return 7, value, values
+      return 7, values
     elif count==3:
       # trójka
       trips.append(value)
@@ -40,8 +40,8 @@ def evaluateHand(hand):
 
 
   if trips:
-    if pairs: return 6, trips, pairs, values
-    else: return 3, trips, pairs, values
+    if pairs: return 6, values
+    else: return 3, values
   else:
-    return len(pairs), pairs, values
+    return len(pairs), values
   

@@ -1,4 +1,4 @@
-import players , cards, showdown, bid, results, move
+import players , cards, showdown, bid, results, move, startround
 import random
 import os
 import time
@@ -41,8 +41,15 @@ def initializeNewGame(arrayAfterShowDown):
       if player['id']==prevPlayer['id']:
         player['credits']==prevPlayer['credits']
   
+  for player in arrayForNextRound:
+    if player['credits']<300:
+      print(f"Gracz {player['nick']} nie ma wystarczająco $$ - Koniec gry")
+      results.readResults()
+      return 0
+  
   dealerIndex = (dealerPlayerIndex+1)%NUMBEROFPLAYERS
   giveRoles(dealerIndex, arrayForNextRound)
+  bid.resetBet()
   bid.resetPot()
   bid.resetPlayersBets()
   bid.resetCheck()
@@ -58,26 +65,26 @@ def startGame(PLAYERS, firstGame):
   cards.giveCardsToPlayers(PLAYERS, CARDS, NUMBEROFPLAYERS)
   cards.showCardsToPlayers(PLAYERS)
   ## licytacja 1
-  newPlayersArray = bid.startBidding(PLAYERS)
+  newPlayersArray = startround.startBidding(PLAYERS)
   ## pierwsze 3 karty
   communityCards=cards.selectFlop(NUMBEROFPLAYERS, CARDS)
-  arrayAfterFlop = bid.beginNextRound(PLAYERS, newPlayersArray, communityCards)
+  arrayAfterFlop = startround.beginNextRound(PLAYERS, newPlayersArray, communityCards)
   ## kolejna 4 karta - turn (dodawana jest do community cards)
   turn = cards.selectTurn(NUMBEROFPLAYERS, CARDS)
   communityCards.append(turn)
-  arrayAfterTurn = bid.beginNextRound(PLAYERS,arrayAfterFlop, communityCards)
+  arrayAfterTurn = startround.beginNextRound(PLAYERS,arrayAfterFlop, communityCards)
   ## 5 karta river
   river = cards.selectRiver(NUMBEROFPLAYERS, CARDS)
   communityCards.append(river)
-  arrayAfterRiver = bid.beginNextRound(PLAYERS, arrayAfterTurn, communityCards)
+  arrayAfterRiver = startround.beginNextRound(PLAYERS, arrayAfterTurn, communityCards)
   ## zakonczenie licytacji - showdown
   arrayAfterShowDown = showdown.showDown(arrayAfterRiver, communityCards)
   # zapisać wyniki do pliku
-  results.savePlayersArray(arrayAfterShowDown)
+  results.savePlayersArray(arrayAfterShowDown, PLAYERSLIST)
   ## grać dalej czy nie?
   response=0
   while True:
-    response=move.getPlayersResponse("Czy chcesz grać dalej? TAK-1; NIE-2")
+    response=move.getPlayersResponse("Czy chcesz grać dalej? TAK-1; NIE-2: ")
     if response==1 or response==2:
       break
     else:
@@ -86,16 +93,8 @@ def startGame(PLAYERS, firstGame):
     # koniec gry, wyświetlenie wyników
     results.readResults()
   elif response==1:
-    # gra kontynuowana (sprawdzenie czy każdy gracz ma wystarczająco kredytów 300)
-    for player in arrayAfterShowDown:
-      if player['credits']<300:
-        print(f"Gracz {player['nick']} nie ma wystarczająco $$ - Koniec gry")
-        results.readResults()
     ## gracze mają wystarczająco kredytów do dalszej gry
     os.system('cls')
     initializeNewGame(arrayAfterShowDown)
         
 startGame(PLAYERSLIST, True)
-
-
-

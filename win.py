@@ -1,10 +1,8 @@
-import cards
-from bid import getPot
+import cards, bid
 def handleWinner(PLAYERSARRAY, winnersArray, handValue):
   newPlayersArray= PLAYERSARRAY.copy()
   handName=cards.getHandName(handValue)
-  print(handValue, handName)
-  pot=getPot()
+  pot=bid.getPot()
   if len(winnersArray)==1:
     nick=""
     for player in newPlayersArray:

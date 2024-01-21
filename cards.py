@@ -17,7 +17,6 @@ def selectRiver(numberOfPlayers, cards):
 
 def giveCardsToPlayers(PLAYERS, CARDS, NUMBEROFPLAYERS):
   #tasowanie
-  print(PLAYERS)
   random.shuffle(CARDS)
   cardsIndex=0
   for j in range(NUMBEROFPLAYERS):
