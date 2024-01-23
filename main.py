@@ -1,8 +1,7 @@
-import players
+import players , cards, showdown, bid, results, move, startround
 import random
 import os
 import time
-import bid
 CARDS=[]
 colors = ["pik", "trefl", "karo", "kier"]
 for color in colors:
@@ -11,81 +10,91 @@ for color in colors:
       "color": color,
       "value": i,
     })
-PLAYERS = []
+PLAYERSLIST = []
 firstGame=True
 INITIALCREDITS=500
-
 NUMBEROFPLAYERS = 4
-PLAYERS = players.getPlayers(NUMBEROFPLAYERS)
-
+PLAYERSLIST = players.getPlayers(NUMBEROFPLAYERS)
+dealerPlayerIndex=None
 roles = ["D", "SB", "BB", ""]
-def giveRoles():
-  randomPlayerIndex = random.randint(0,NUMBEROFPLAYERS-1)
+def giveRoles(index, PLAYERS):
+  #randomPlayerIndex = random.randint(0,NUMBEROFPLAYERS-1)
   mainRolesCounter = 0
   for i in range(NUMBEROFPLAYERS):
     if mainRolesCounter < 3:
-      PLAYERS[(i+randomPlayerIndex)%NUMBEROFPLAYERS]['role'] = roles[mainRolesCounter]
+      PLAYERS[(i+index)%NUMBEROFPLAYERS]['role'] = roles[mainRolesCounter]
       mainRolesCounter+=1
     else:
-      PLAYERS[(i+randomPlayerIndex)%NUMBEROFPLAYERS]['role'] = ""
+      PLAYERS[(i+index)%NUMBEROFPLAYERS]['role'] = ""
+  return PLAYERS
 
 def giveInitialCredits():
   if firstGame:
-    for player in PLAYERS:
+    for player in PLAYERSLIST:
       player['credits']=INITIALCREDITS
 
-def giveCardsToPlayers():
-  #tasowanie
-  random.shuffle(CARDS)
-  cardsIndex=0
-  for j in range(NUMBEROFPLAYERS):
-    PLAYERS[j]['cards'] = [CARDS[cardsIndex], CARDS[cardsIndex+1]]
-    cardsIndex+=2
+def initializeNewGame(arrayAfterShowDown):
+  # zmiana roli, dodanie graczy, którzy zrobili fold, dodanie kredytów
+  arrayForNextRound=PLAYERSLIST.copy()
+  for player in arrayForNextRound:
+    for prevPlayer in arrayAfterShowDown:
+      if player['id']==prevPlayer['id']:
+        player['credits']==prevPlayer['credits']
   
-def showCardsToPlayers():
-  for player in PLAYERS:
-    card1Value=player['cards'][0]['value']
-    card2Value=player['cards'][1]['value']
-    card1Name=""    
-    card2Name=""
-    card1Name=card1Value    
-    card2Name=card2Value    
-    if card1Value>10:
-      if card1Value == 11:
-        card1Name="J"
-      elif card1Value == 12:
-        card1Name="Q"
-      elif card1Value == 13:
-        card1Name="K"
-      elif card1Value == 14:
-        card1Name="A"
-    if card2Value>10:
-      if card2Value == 11:
-        card2Name="J"
-      elif card2Value == 12:
-        card2Name="Q"
-      elif card2Value == 13:
-        card2Name="K"
-      elif card2Value == 14:
-        card2Name="A"
+  for player in arrayForNextRound:
+    if player['credits']<300:
+      print(f"Gracz {player['nick']} nie ma wystarczająco $$ - Koniec gry")
+      results.readResults()
+      return 0
+  
+  dealerIndex = (dealerPlayerIndex+1)%NUMBEROFPLAYERS
+  giveRoles(dealerIndex, arrayForNextRound)
+  bid.resetBet()
+  bid.resetPot()
+  bid.resetPlayersBets()
+  bid.resetCheck()
+  startGame(arrayForNextRound, False)
 
-    playersCards = f"{card1Name} {player['cards'][0]['color']}, {card2Name} {player['cards'][1]['color']}"
-    print(f"{player['nick']} {player['role']}: {playersCards}")
-    time.sleep(1)
+def startGame(PLAYERS, firstGame):
+  global dealerPlayerIndex
+  if firstGame:
+    dealerPlayerIndex = random.randint(0,NUMBEROFPLAYERS-1)
+    giveInitialCredits()
+
+  giveRoles(dealerPlayerIndex, PLAYERS)
+  cards.giveCardsToPlayers(PLAYERS, CARDS, NUMBEROFPLAYERS)
+  cards.showCardsToPlayers(PLAYERS)
+  ## licytacja 1
+  newPlayersArray = startround.startBidding(PLAYERS)
+  ## pierwsze 3 karty
+  communityCards=cards.selectFlop(NUMBEROFPLAYERS, CARDS)
+  arrayAfterFlop = startround.beginNextRound(PLAYERS, newPlayersArray, communityCards)
+  ## kolejna 4 karta - turn (dodawana jest do community cards)
+  turn = cards.selectTurn(NUMBEROFPLAYERS, CARDS)
+  communityCards.append(turn)
+  arrayAfterTurn = startround.beginNextRound(PLAYERS,arrayAfterFlop, communityCards)
+  ## 5 karta river
+  river = cards.selectRiver(NUMBEROFPLAYERS, CARDS)
+  communityCards.append(river)
+  arrayAfterRiver = startround.beginNextRound(PLAYERS, arrayAfterTurn, communityCards)
+  ## zakonczenie licytacji - showdown
+  arrayAfterShowDown = showdown.showDown(arrayAfterRiver, communityCards)
+  # zapisać wyniki do pliku
+  results.savePlayersArray(arrayAfterShowDown, PLAYERSLIST)
+  ## grać dalej czy nie?
+  response=0
+  while True:
+    response=move.getPlayersResponse("Czy chcesz grać dalej? TAK-1; NIE-2: ")
+    if response==1 or response==2:
+      break
+    else:
+      print("Wybierz 1 albo 2")
+  if response==2:
+    # koniec gry, wyświetlenie wyników
+    results.readResults()
+  elif response==1:
+    ## gracze mają wystarczająco kredytów do dalszej gry
     os.system('cls')
-
-def startGame():
-  giveRoles()
-  giveInitialCredits()
-  giveCardsToPlayers()
-  showCardsToPlayers()
-  bid.startBidding(PLAYERS)
-
-startGame()
-
-
-
-
-
-
-
+    initializeNewGame(arrayAfterShowDown)
+        
+startGame(PLAYERSLIST, True)
